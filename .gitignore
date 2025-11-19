@@ -30,3 +30,40 @@
 *.exe
 *.out
 *.app
+
+# Rust / Cargo
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# Node / NPM
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.pnpm-debug.log*
+
+# Tauri
+**/target/
+**/WixTools
+src-tauri/target
+
+# Vite / Build outputs
+dist/
+ui/dist/
+.vite/
+*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
