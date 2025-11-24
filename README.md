@@ -1,76 +1,167 @@
-# Roche Accu-Chek Guide sample download utility
+# AccuChek - Blood Glucose Data Manager
 
-## **TL;DR:**
+A monorepo containing applications for downloading and managing blood glucose data from Roche AccuChek devices.
 
-Linux C++-17 code to download samples from a "ROCHE ACCU-CHEK Guide"
-blood glucose monitor using libusb
+## Project Structure
 
-## **To compile:**
+```
+accuchek/
+├── apps/
+│   ├── tauri/              # Tauri desktop app (macOS, Windows, Linux)
+│   ├── ios/                # iOS native app (SwiftUI)
+│   └── macos-swift/        # macOS native app (SwiftUI)
+├── packages/
+│   ├── accuchek-core/      # Rust core library (USB communication)
+│   └── AccuChekKit/        # Swift package (shared iOS/macOS)
+├── legacy/                 # Original C++ implementation
+├── Cargo.toml              # Rust workspace configuration
+└── README.md
+```
 
-+ install libusb-1.0-dev
-+ install build-essential
-+ in a shell, type:
+## Applications
 
-    `make`
+### Tauri Desktop App (macOS/Windows/Linux)
+A cross-platform desktop application built with Tauri and React.
 
-## **To run:**
+**Features:**
+- USB device connection and data download
+- JSON/CSV export
+- Modern React UI
 
-+ connect your device via USB to your computer
-+ in a root shell, type:
+**Build:**
+```bash
+cd apps/tauri
+npm install
+npm run tauri:build
+```
 
-    `./accuchek > samples.json`
+### iOS App (SwiftUI)
+Native iOS application for iPhone and iPad.
 
-+ blood glucose levels should be in file samples.json
-+ if it didn't work see "a number of things can go wrong" below
+**Features:**
+- Bluetooth LE connection to AccuChek devices
+- Glucose trend visualization
+- History tracking
+- Data export
 
-## **What it does:**
+**Build:**
+Open `apps/ios/AccuChek/AccuChek.xcodeproj` in Xcode.
 
-+ scans all USB devices in the system
-+ finds an Accu-Chek Guide device if there's one
-+ connects to it
-+ downloads all blood glucose samples
-+ dumps them as JSON on stdout
-+ hopefully exit gracefully
+### macOS Native App (SwiftUI)
+Native macOS application with full desktop integration.
 
-## **Of interest:**
+**Features:**
+- Bluetooth and USB device support
+- Advanced data visualization with charts
+- Sidebar navigation
+- Native macOS look and feel
+- Keyboard shortcuts
 
-+ This has been tested on Ubuntu 20.04. On other Unixes, YMMV.
+**Build:**
+Open `apps/macos-swift/AccuChek/AccuChek.xcodeproj` in Xcode.
 
-+ The file config.txt contains the USB id's of supported devices.
-  If you have a slightly difference device that may work with this
-  code, add its parameters (found in the output of lsusb) to the
-  file and see if it works. Please submit a PR of it does.
+## Packages
 
-+ This is a rough first cut, improvements via PRs are welcome.
+### accuchek-core (Rust)
+Core library for USB communication with AccuChek devices.
 
-+ Unless you enjoy futzing around with udev and the like, you
-  should run the utility as root
+```bash
+# Build CLI tool
+cd packages/accuchek-core
+cargo build --release
 
-+ Produced JSON has glucose levels in both mg/dL and mmol/L units
+# Run CLI
+./target/release/accuchek-cli > samples.json
+```
 
-+ The ascii timestamps in JSON are expressed in the local device time
+### AccuChekKit (Swift)
+Shared Swift package for iOS and macOS apps.
 
-+ The epoch timestamps in JSON are GMT, assuming the computer running
-  the utility is set to the same timezone as the Accu-Chek device.
+**Contains:**
+- `GlucoseSample` - Data model for glucose readings
+- `DataManager` - Data persistence and export
+- `BluetoothService` - BLE device communication
+- Statistics and analytics utilities
 
-+ The proprietary USB protocol needed to talk to the device was
-  reverse-engineered from the Javascript code found here the author
-  of which likely had access to the vendor documentation:
+## Supported Devices
 
-    https://github.com/tidepool-org/uploader/tree/master/lib/drivers/roche
+- Roche AccuChek Guide
+- Other compatible devices (see `config.txt`)
 
-+ The JS code has a little more functionality (eg it can set the device
-  time), but as much as I can ascertain, it's not particularly portable:
-  it only runs on top of Chrome, and even there, I have never really
-  managed to get it to run on anything but windoze: the amount of dependencies
-  you have to install to ever hope to see it run is simply frightening.
+## Requirements
 
-+ A number of things might go wrong with this code. When that happens:
+### Rust/Tauri Apps
+- Rust 1.70+
+- Node.js 18+
+- libusb (Linux: `libusb-1.0-dev`)
 
-    + disconnect device USB cable
-    + kill the utility
-    + re-connect device USB cable
-    + make sure it says "**data transfer / transferring data**" on the device screen
-    + type in a root shell: `export ACCUCHEK_DBG=1`
-    + from the same shell, run the utility again to see what the problem is
+### Swift Apps
+- Xcode 15+
+- macOS 13+ / iOS 16+
 
+## Development
+
+### Rust Workspace
+```bash
+# Build all Rust packages
+cargo build
+
+# Run tests
+cargo test
+
+# Build release
+cargo build --release
+```
+
+### Swift Package
+```bash
+cd packages/AccuChekKit
+swift build
+swift test
+```
+
+## Legacy Code
+
+The original C++ implementation is preserved in the `legacy/` directory for reference.
+
+```bash
+cd legacy
+make
+./accuchek > samples.json
+```
+
+## Data Format
+
+Glucose readings are exported in JSON format:
+
+```json
+[
+  {
+    "id": 1,
+    "epoch": 1700000000,
+    "timestamp": "2024-11-14 10:30:00",
+    "mg/dL": 105,
+    "mmol/L": 5.8
+  }
+]
+```
+
+## Troubleshooting
+
+### USB Connection Issues
+1. Disconnect device USB cable
+2. Reconnect and ensure device displays "data transfer" mode
+3. On Linux, run with `sudo` or configure udev rules
+
+### Bluetooth Issues
+1. Ensure Bluetooth is enabled on your device
+2. Put AccuChek device in pairing mode
+3. Grant Bluetooth permissions to the app
+
+## License
+
+Unlicense - See LICENSE.txt
+
+## Contributing
+
+Pull requests are welcome! Please ensure your changes work with all applications in the monorepo.
