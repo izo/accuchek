@@ -1,0 +1,31 @@
+[package]
+name = "accuchek-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Core library for AccuChek blood glucose data communication"
+
+[lib]
+name = "accuchek_core"
+crate-type = ["lib", "staticlib", "cdylib"]
+
+[[bin]]
+name = "accuchek-cli"
+path = "src/main.rs"
+
+[dependencies]
+rusb.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+log.workspace = true
+env_logger.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+clap = { version = "4.0", features = ["derive"] }
+toml.workspace = true
+
+[features]
+default = []
+ffi = []
